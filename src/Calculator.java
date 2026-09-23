@@ -1,26 +1,41 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Calculator {
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        List<String> istoric = new ArrayList<>();
 
-        System.out.println("=== Calculator Java ===");
+        System.out.println("=== Calculator Java Avansat ===");
 
-        System.out.print("Introdu primul număr: ");
-        double num1 = scanner.nextDouble();
+        while (true) {
+            System.out.print("\nAlege operația (+, -, *, /, ^, %) sau 'h' (istoric), 'x' (ieșire): ");
+            String optiune = scanner.next();
 
-        System.out.print("Alege operația (+, -, *, /): ");
-        char operator = scanner.next().charAt(0);
+            if (optiune.equalsIgnoreCase("x")) {
+                System.out.println("La revedere!");
+                break;
+            }
 
-        System.out.print("Introdu al doilea număr: ");
-        double num2 = scanner.nextDouble();
+            if (optiune.equalsIgnoreCase("h")) {
+                afiseazaIstoric(istoric);
+                continue;
+            }
 
-        try {
-            double rezultat = calculeaza(num1, num2, operator);
-            System.out.printf("Rezultat: %.2f %c %.2f = %.2f%n", num1, operator, num2, rezultat);
-        } catch (IllegalArgumentException | ArithmeticException e) {
-            System.out.println("Eroare: " + e.getMessage());
+            char operator = optiune.charAt(0);
+
+            double num1 = citesteNumar(scanner, "Introdu primul număr: ");
+            double num2 = citesteNumar(scanner, "Introdu al doilea număr: ");
+
+            try {
+                double rezultat = calculeaza(num1, num2, operator);
+                String intrareIstoric = String.format("%.2f %c %.2f = %.2f", num1, operator, num2, rezultat);
+                istoric.add(intrareIstoric);
+                System.out.println("Rezultat: " + intrareIstoric);
+            } catch (IllegalArgumentException | ArithmeticException e) {
+                System.out.println("Eroare: " + e.getMessage());
+            }
         }
 
         scanner.close();
@@ -37,7 +52,35 @@ public class Calculator {
                 }
                 yield a / b;
             }
-            default -> throw new IllegalArgumentException("Operator invalid: " + op);
+            case '%' -> {
+                if (b == 0) {
+                    throw new ArithmeticException("Modulo cu zero nu este permis!");
+                }
+                yield a % b;
+            }
+            case '^' -> Math.pow(a, b);
+            default -> throw new IllegalArgumentException("Operator necunoscut: " + op);
         };
+    }
+
+    private static double citesteNumar(Scanner scanner, String mesaj) {
+        while (true) {
+            System.out.print(mesaj);
+            if (scanner.hasNextDouble()) {
+                return scanner.nextDouble();
+            } else {
+                System.out.println("Valoare invalidă! Te rog introdu un număr valid.");
+                scanner.next(); // consuma valoarea gresita
+            }
+        }
+    }
+
+    private static void afiseazaIstoric(List<String> istoric) {
+        if (istoric.isEmpty()) {
+            System.out.println("Istoricul este gol.");
+        } else {
+            System.out.println("--- Istoric Calcule ---");
+            istoric.forEach(System.out::println);
+        }
     }
 }
